@@ -1,94 +1,649 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Buscador de Centros de Canje</title>
-
-<link rel="stylesheet"
-href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-
-<style>
-
-body{
-font-family:Arial;
-margin:0;
-background:#0f172a;
-color:white;
-}
-
-h1{
-padding:20px;
-text-align:center;
-}
-
-#map{
-height:90vh;
-width:100%;
-}
-
-</style>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>canjeapowerade.com — Buscador Powerade</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #fff;
+    }
+    #app {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      height: 100vh;
+    }
+    .sidebar {
+      background: #111827;
+      border-right: 1px solid rgba(255,255,255,.08);
+      padding: 18px 16px;
+      overflow-y: auto;
+    }
+    .brand {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .sub {
+      font-size: 13px;
+      color: #cbd5e1;
+      margin-bottom: 14px;
+      line-height: 1.45;
+    }
+    .btn {
+      width: 100%;
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: .2px;
+      cursor: pointer;
+      background: linear-gradient(135deg, #00E5FF 0%, #00A3FF 100%);
+      color: #04111f;
+      margin-bottom: 10px;
+      box-shadow: 0 10px 24px rgba(0,163,255,.22);
+    }
+    .btn.secondary {
+      background: #162033;
+      color: #e5e7eb;
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: none;
+    }
+    .btn.ghost {
+      background: transparent;
+      color: #7dd3fc;
+      border: 1px solid rgba(125,211,252,.35);
+      box-shadow: none;
+    }
+    .search {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 14px;
+      background: #081120;
+      color: #fff;
+      margin: 8px 0 14px;
+    }
+    select.search {
+      appearance: none;
+    }
+    .stat {
+      background: #0b1220;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .stat strong {
+      display: block;
+      font-size: 20px;
+      margin-bottom: 3px;
+    }
+    .panel {
+      background: #0b1220;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .panel h4 {
+      margin: 0 0 8px;
+      font-size: 14px;
+    }
+    .panel p {
+      margin: 0;
+      font-size: 12px;
+      color: #cbd5e1;
+      line-height: 1.45;
+    }
+    .results {
+      margin-top: 12px;
+      display: grid;
+      gap: 10px;
+    }
+    .card {
+      background: #0b1220;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 14px;
+      padding: 12px;
+      cursor: pointer;
+    }
+    .card:hover {
+      border-color: rgba(34,197,94,.5);
+    }
+    .card h4 {
+      margin: 0 0 6px;
+      font-size: 14px;
+      color: #fff;
+    }
+    .meta {
+      font-size: 12px;
+      color: #cbd5e1;
+      line-height: 1.45;
+    }
+    .status {
+      font-size: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+    .status.info {
+      background: rgba(0,163,255,.14);
+      border: 1px solid rgba(0,229,255,.28);
+      color: #d8f7ff;
+    }
+    .status.warn {
+      background: rgba(245,158,11,.15);
+      border: 1px solid rgba(245,158,11,.35);
+      color: #fde68a;
+    }
+    .hero {
+      background: linear-gradient(135deg, rgba(0,229,255,.12) 0%, rgba(0,163,255,.04) 100%);
+      border: 1px solid rgba(0,229,255,.14);
+      border-radius: 18px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    .hero h3 {
+      margin: 0 0 6px;
+      font-size: 18px;
+      color: #f8fafc;
+    }
+    .hero p {
+      margin: 0;
+      font-size: 12px;
+      color: #cbd5e1;
+      line-height: 1.45;
+    }
+    .badge {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #001018;
+      background: #7dd3fc;
+      border-radius: 999px;
+      padding: 5px 9px;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .tiny {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 6px;
+    }
+    input[type="file"] {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px dashed rgba(255,255,255,.18);
+      border-radius: 12px;
+      padding: 10px;
+      background: #111827;
+      color: #e5e7eb;
+    }
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+    .leaflet-popup-content {
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    code {
+      color: #bfdbfe;
+    }
+    @media (max-width: 900px) {
+      #app {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+      }
+      .sidebar {
+        max-height: 52vh;
+      }
+      #map {
+        height: 48vh;
+      }
+    }
+  </style>
 </head>
-
 <body>
+  <div id="app">
+    <aside class="sidebar">
+      <div class="brand">canjeapowerade.com</div>
+      <div class="sub">
+        Buscá el centro de canje más cercano desde tu ubicación y elegí cómo llegar en segundos.
+      </div>
 
-<h1>Buscador de Centros de Canje Powerade</h1>
+      <div class="hero">
+        <h3>Powerade Locator MVP</h3>
+        <p>Mapa interactivo para encontrar centros de canje por cercanía, ciudad o barrio.</p>
+        <div class="badge">MVP activo</div>
+      </div>
 
-<div id="map"></div>
+      <div id="statusBox" class="status info">Inicializando mapa…</div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+      <div class="row">
+        <button class="btn" id="locateBtn">Usar mi ubicación</button>
+        <button class="btn secondary" id="fitBtn">Ver todos</button>
+      </div>
+      <div class="row">
+        <button class="btn" id="nearestBtn">Centro más cercano</button>
+        <button class="btn ghost" id="resetFiltersBtn">Limpiar filtros</button>
+      </div>
 
-<script>
+      <input id="searchInput" class="search" placeholder="Buscar por centro, ciudad o barrio" />
+      <div class="row">
+        <select id="cityFilter" class="search">
+          <option value="">Todas las ciudades</option>
+        </select>
+        <select id="barrioFilter" class="search">
+          <option value="">Todos los barrios</option>
+        </select>
+      </div>
 
-const map = L.map('map').setView([-27.45,-58.98],12)
+      <div class="stat"><strong id="totalCount">0</strong>Total de centros</div>
+      <div class="stat"><strong id="nearCount">0</strong>Centros visibles / filtrados</div>
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-attribution:'© OpenStreetMap'
-}).addTo(map)
+      <div class="panel">
+        <h4>Cargar archivo JSON</h4>
+        <input type="file" id="fileInput" accept=".json,application/json" />
+        <div class="tiny">
+          Si abrís este HTML de forma local o tu servidor devuelve HTML/XML en vez de JSON, elegí acá el archivo correcto.
+        </div>
+      </div>
 
-fetch("./centros_canje_pow.json")
+      <div class="panel">
+        <h4>Chequeos rápidos</h4>
+        <p id="testsOutput">Pendiente.</p>
+      </div>
 
-.then(res => res.json())
+      <div class="results" id="results"></div>
+    </aside>
 
-.then(data => {
+    <div id="map"></div>
+  </div>
 
-data.forEach(c => {
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const FALLBACK_CENTERS = [];
 
-L.marker([c.lat,c.lng])
-.addTo(map)
-.bindPopup(
-"<b>"+c.name+"</b><br>"+
-c.direccion+"<br>"+
-c.municipio+"<br>"+
-"<a target='_blank' href='https://www.google.com/maps/dir/?api=1&destination="+c.lat+","+c.lng+"'>Cómo llegar</a>"
-)
+    const map = L.map("map").setView([-27.45, -58.98], 12);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; OpenStreetMap contributors",
+      maxZoom: 19
+    }).addTo(map);
 
-})
+    const totalCountEl = document.getElementById("totalCount");
+    const nearCountEl = document.getElementById("nearCount");
+    const resultsEl = document.getElementById("results");
+    const searchInput = document.getElementById("searchInput");
+    const cityFilter = document.getElementById("cityFilter");
+    const barrioFilter = document.getElementById("barrioFilter");
+    const nearestBtn = document.getElementById("nearestBtn");
+    const resetFiltersBtn = document.getElementById("resetFiltersBtn");
+    const locateBtn = document.getElementById("locateBtn");
+    const fitBtn = document.getElementById("fitBtn");
+    const fileInput = document.getElementById("fileInput");
+    const statusBox = document.getElementById("statusBox");
+    const testsOutput = document.getElementById("testsOutput");
 
-})
+    const centerIcon = L.icon({
+      iconUrl: "https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/images/marker-icon.png",
+      shadowUrl: "https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/images/marker-shadow.png",
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
 
-if(navigator.geolocation){
+    const userIcon = L.divIcon({
+      className: "",
+      html: '<div style="width:18px;height:18px;border-radius:999px;background:#2563eb;border:3px solid white;box-shadow:0 0 0 6px rgba(37,99,235,.18)"></div>',
+      iconSize: [18, 18],
+      iconAnchor: [9, 9]
+    });
 
-navigator.geolocation.getCurrentPosition(pos => {
+    let CENTERS = [];
+    let currentData = [];
+    let markers = [];
+    let userMarker = null;
+    let userCoords = null;
 
-const lat = pos.coords.latitude
-const lng = pos.coords.longitude
+    function setStatus(message, kind = "info") {
+      statusBox.className = `status ${kind}`;
+      statusBox.innerHTML = message;
+    }
 
-L.marker([lat,lng])
-.addTo(map)
-.bindPopup("Tu ubicación")
-.openPopup()
+    function isValidCenter(item) {
+      return item && typeof item === "object" && Number.isFinite(Number(item.lat)) && Number.isFinite(Number(item.lng));
+    }
 
-map.setView([lat,lng],13)
+    function normalizeCenter(item) {
+      return {
+        name: item.name || item.nombre || "Centro de canje",
+        lat: Number(item.lat),
+        lng: Number(item.lng),
+        municipio: item.municipio || "",
+        barrio: item.barrio || "",
+        cp: item.cp || item.codigo_postal || item["Codigo Postal"] || "",
+        direccion: item.direccion || "",
+        territorio: item.territorio || ""
+      };
+    }
 
-})
+    function popupHtml(c) {
+      return `
+        <strong>${c.name || "Centro de canje"}</strong><br>
+        ${c.direccion ? c.direccion + "<br>" : ""}
+        ${c.barrio ? "Barrio: " + c.barrio + "<br>" : ""}
+        ${c.municipio ? "Municipio: " + c.municipio + "<br>" : ""}
+        ${c.cp ? "C.P.: " + c.cp + "<br>" : ""}
+        <a href="https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}" target="_blank" rel="noopener">Cómo llegar</a>
+      `;
+    }
 
-}
+    function renderMarkers(data) {
+      markers.forEach(m => map.removeLayer(m));
+      markers = [];
+      data.forEach(c => {
+        const marker = L.marker([c.lat, c.lng], { icon: centerIcon }).addTo(map).bindPopup(popupHtml(c));
+        marker._data = c;
+        markers.push(marker);
+      });
+      nearCountEl.textContent = data.length;
+    }
 
-</script>
+    function renderList(data) {
+      resultsEl.innerHTML = "";
+      if (!data.length) {
+        resultsEl.innerHTML = '<div class="card"><h4>Sin resultados</h4><div class="meta">Probá otro filtro o cargá un JSON válido.</div></div>';
+        return;
+      }
+      data.slice(0, 100).forEach((c, idx) => {
+        const el = document.createElement("div");
+        el.className = "card";
+        const distanceLabel = c.distanceKm != null ? `<br><strong style="color:#7dd3fc">${c.distanceKm.toFixed(1)} km</strong>` : "";
+        el.innerHTML = `
+          <h4>${idx + 1}. ${c.name || "Centro de canje"}</h4>
+          <div class="meta">
+            ${c.barrio ? c.barrio + " · " : ""}${c.municipio || ""}<br>
+            ${c.cp ? "C.P. " + c.cp + "<br>" : ""}
+            ${c.direccion || ""}${distanceLabel}
+          </div>
+        `;
+        el.onclick = () => {
+          map.setView([c.lat, c.lng], 17);
+          const m = markers.find(mm => mm._data === c);
+          if (m) m.openPopup();
+        };
+        resultsEl.appendChild(el);
+      });
+    }
 
+    function fitAll(data) {
+      if (!data.length) return;
+      const bounds = L.latLngBounds(data.map(c => [c.lat, c.lng]));
+      map.fitBounds(bounds.pad(0.08));
+    }
+
+    function toRad(v) {
+      return v * Math.PI / 180;
+    }
+
+    function distanceKm(aLat, aLng, bLat, bLng) {
+      const R = 6371;
+      const dLat = toRad(bLat - aLat);
+      const dLng = toRad(bLng - aLng);
+      const aa = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(aLat)) * Math.cos(toRad(bLat)) * Math.sin(dLng / 2) ** 2;
+      const c = 2 * Math.atan2(Math.sqrt(aa), Math.sqrt(1 - aa));
+      return R * c;
+    }
+
+    function sortByDistance(lat, lng) {
+      currentData = [...currentData]
+        .map(c => ({ ...c, distanceKm: distanceKm(lat, lng, c.lat, c.lng) }))
+        .sort((a, b) => a.distanceKm - b.distanceKm);
+
+      renderMarkers(currentData);
+      renderList(currentData.map(c => ({
+        ...c,
+        name: c.distanceKm != null ? `${c.name} · ${c.distanceKm.toFixed(1)} km` : c.name
+      })));
+    }
+
+    function applyCenters(data, sourceLabel = "fuente desconocida") {
+      CENTERS = data.filter(isValidCenter).map(normalizeCenter);
+      currentData = [...CENTERS];
+      totalCountEl.textContent = CENTERS.length;
+      populateFilters(CENTERS);
+      renderMarkers(currentData);
+      renderList(currentData);
+      if (currentData.length) {
+        fitAll(currentData);
+        setStatus(`Datos cargados desde <strong>${sourceLabel}</strong>. Centros válidos: <strong>${CENTERS.length}</strong>.`, "info");
+      } else {
+        setStatus(`La fuente <strong>${sourceLabel}</strong> no tiene centros válidos con lat/lng.`, "warn");
+      }
+    }
+
+    function uniqueSorted(values) {
+      return [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
+    }
+
+    function populateFilters(data) {
+      const cities = uniqueSorted(data.map(c => c.municipio));
+      const barrios = uniqueSorted(data.map(c => c.barrio));
+
+      cityFilter.innerHTML = '<option value="">Todas las ciudades</option>' +
+        cities.map(v => `<option value="${v}">${v}</option>`).join('');
+
+      barrioFilter.innerHTML = '<option value="">Todos los barrios</option>' +
+        barrios.map(v => `<option value="${v}">${v}</option>`).join('');
+    }
+
+    function applyFilters() {
+      const q = searchInput.value.trim().toLowerCase();
+      const city = cityFilter.value;
+      const barrio = barrioFilter.value;
+
+      currentData = CENTERS.filter(c => {
+        const matchesText = !q ||
+          (c.name || '').toLowerCase().includes(q) ||
+          (c.municipio || '').toLowerCase().includes(q) ||
+          (c.barrio || '').toLowerCase().includes(q);
+        const matchesCity = !city || c.municipio === city;
+        const matchesBarrio = !barrio || c.barrio === barrio;
+        return matchesText && matchesCity && matchesBarrio;
+      });
+
+      if (userCoords) {
+        currentData = currentData.map(c => ({
+          ...c,
+          distanceKm: distanceKm(userCoords.lat, userCoords.lng, c.lat, c.lng)
+        })).sort((a, b) => (a.distanceKm ?? 999999) - (b.distanceKm ?? 999999));
+      }
+
+      renderMarkers(currentData);
+      renderList(currentData);
+      if (currentData.length) fitAll(currentData);
+    }
+
+    async function loadJsonFromResponse(res) {
+      const contentType = (res.headers.get("content-type") || "").toLowerCase();
+      const text = await res.text();
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: no se pudo cargar el archivo JSON.`);
+      }
+
+      const trimmed = text.trim();
+      const looksLikeHtmlOrXml = trimmed.startsWith("<") || contentType.includes("text/html") || contentType.includes("xml");
+      if (looksLikeHtmlOrXml) {
+        throw new Error("La respuesta no es JSON válido. El servidor devolvió HTML o XML.");
+      }
+
+      let parsed;
+      try {
+        parsed = JSON.parse(text);
+      } catch {
+        throw new Error("El archivo encontrado no tiene formato JSON válido.");
+      }
+
+      if (!Array.isArray(parsed)) {
+        throw new Error("El JSON debe ser un array de centros.");
+      }
+
+      return parsed;
+    }
+
+    async function tryLoadDefaultJson() {
+      try {
+        const res = await fetch("./centros_canje_pow.json", { cache: "no-store" });
+        const parsed = await loadJsonFromResponse(res);
+        applyCenters(parsed, "centros_canje_pow.json");
+      } catch (e) {
+        console.error(e);
+        if (FALLBACK_CENTERS.length) {
+          applyCenters(FALLBACK_CENTERS, "datos embebidos");
+          setStatus(`No se pudo leer <strong>centros_canje_pow.json</strong>. Se usaron datos embebidos. Motivo: ${e.message}`, "warn");
+        } else {
+          CENTERS = [];
+          currentData = [];
+          totalCountEl.textContent = "0";
+          nearCountEl.textContent = "0";
+          renderList([]);
+          setStatus(`No se pudo leer <strong>centros_canje_pow.json</strong>. Motivo: ${e.message}<br>Elegí el archivo manualmente abajo o serví este HTML desde una carpeta donde exista el JSON correcto.`, "warn");
+        }
+      }
+    }
+
+    fileInput.addEventListener("change", async (event) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const parsed = JSON.parse(text);
+        if (!Array.isArray(parsed)) {
+          throw new Error("El archivo seleccionado no contiene un array JSON.");
+        }
+        applyCenters(parsed, file.name);
+      } catch (e) {
+        console.error(e);
+        setStatus(`El archivo seleccionado no es válido. ${e.message}`, "warn");
+      }
+    });
+
+    locateBtn.addEventListener("click", () => {
+      if (!navigator.geolocation) {
+        alert("Tu navegador no soporta geolocalización.");
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          userCoords = { lat, lng };
+          if (userMarker) map.removeLayer(userMarker);
+          userMarker = L.marker([lat, lng], { icon: userIcon }).addTo(map).bindPopup("Tu ubicación actual").openPopup();
+          map.setView([lat, lng], 14);
+          currentData = [...CENTERS].map(c => ({
+            ...c,
+            distanceKm: distanceKm(lat, lng, c.lat, c.lng)
+          })).sort((a, b) => a.distanceKm - b.distanceKm);
+          renderMarkers(currentData);
+          renderList(currentData);
+          setStatus(`Ubicación detectada. Mostrando centros ordenados por cercanía.`, "info");
+        },
+        () => alert("No se pudo obtener tu ubicación. Revisá permisos del navegador."),
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    });
+
+    nearestBtn.addEventListener("click", () => {
+      if (!userCoords) {
+        setStatus("Primero usá <strong>Usar mi ubicación</strong> para calcular el centro más cercano.", "warn");
+        return;
+      }
+      const nearest = [...CENTERS]
+        .map(c => ({ ...c, distanceKm: distanceKm(userCoords.lat, userCoords.lng, c.lat, c.lng) }))
+        .sort((a, b) => a.distanceKm - b.distanceKm)[0];
+
+      if (!nearest) {
+        setStatus("No se encontró un centro cercano.", "warn");
+        return;
+      }
+
+      currentData = [nearest];
+      renderMarkers(currentData);
+      renderList(currentData);
+      map.setView([nearest.lat, nearest.lng], 17);
+      setStatus(`Centro más cercano encontrado: <strong>${nearest.name}</strong> a <strong>${nearest.distanceKm.toFixed(1)} km</strong>.`, "info");
+    });
+
+    resetFiltersBtn.addEventListener("click", () => {
+      searchInput.value = "";
+      cityFilter.value = "";
+      barrioFilter.value = "";
+      currentData = [...CENTERS];
+      if (userCoords) {
+        currentData = currentData.map(c => ({
+          ...c,
+          distanceKm: distanceKm(userCoords.lat, userCoords.lng, c.lat, c.lng)
+        })).sort((a, b) => a.distanceKm - b.distanceKm);
+      }
+      renderMarkers(currentData);
+      renderList(currentData);
+      if (currentData.length) fitAll(currentData);
+    });
+
+    fitBtn.addEventListener("click", () => {
+      currentData = [...CENTERS];
+      if (userCoords) {
+        currentData = currentData.map(c => ({
+          ...c,
+          distanceKm: distanceKm(userCoords.lat, userCoords.lng, c.lat, c.lng)
+        })).sort((a, b) => a.distanceKm - b.distanceKm);
+      }
+      renderMarkers(currentData);
+      renderList(currentData);
+      fitAll(currentData);
+    });
+
+    searchInput.addEventListener("input", applyFilters);
+    cityFilter.addEventListener("change", applyFilters);
+    barrioFilter.addEventListener("change", applyFilters);
+
+    function runTests() {
+      const tests = [];
+      tests.push({ name: "distanceKm devuelve 0 para el mismo punto", pass: Math.abs(distanceKm(-27, -58, -27, -58)) < 0.0001 });
+      tests.push({ name: "isValidCenter acepta lat/lng numéricos", pass: isValidCenter({ lat: -27.4, lng: -58.9 }) === true });
+      tests.push({ name: "isValidCenter rechaza objetos sin lng", pass: isValidCenter({ lat: -27.4 }) === false });
+      tests.push({ name: "normalizeCenter completa nombre por defecto", pass: normalizeCenter({ lat: -27.4, lng: -58.9 }).name === "Centro de canje" });
+      tests.push({ name: "uniqueSorted ordena y deduplica", pass: JSON.stringify(uniqueSorted(["B", "A", "B"])) === JSON.stringify(["A", "B"]) });
+      testsOutput.innerHTML = tests.map(t => `${t.pass ? "✅" : "❌"} ${t.name}`).join("<br>");
+    }
+
+    async function init() {
+      runTests();
+      await tryLoadDefaultJson();
+    }
+
+    init();
+  </script>
 </body>
 </html>
