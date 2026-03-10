@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Buscador de Centros de Canje</title>
+
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<style>
+
+body{
+font-family:Arial;
+margin:0;
+background:#0f172a;
+color:white;
+}
+
+h1{
+padding:20px;
+text-align:center;
+}
+
+#map{
+height:90vh;
+width:100%;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Buscador de Centros de Canje Powerade</h1>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+
+const map = L.map('map').setView([-27.45,-58.98],12)
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+attribution:'© OpenStreetMap'
+}).addTo(map)
+
+fetch("./centros_canje_pow.json")
+
+.then(res => res.json())
+
+.then(data => {
+
+data.forEach(c => {
+
+L.marker([c.lat,c.lng])
+.addTo(map)
+.bindPopup(
+"<b>"+c.name+"</b><br>"+
+c.direccion+"<br>"+
+c.municipio+"<br>"+
+"<a target='_blank' href='https://www.google.com/maps/dir/?api=1&destination="+c.lat+","+c.lng+"'>Cómo llegar</a>"
+)
+
+})
+
+})
+
+if(navigator.geolocation){
+
+navigator.geolocation.getCurrentPosition(pos => {
+
+const lat = pos.coords.latitude
+const lng = pos.coords.longitude
+
+L.marker([lat,lng])
+.addTo(map)
+.bindPopup("Tu ubicación")
+.openPopup()
+
+map.setView([lat,lng],13)
+
+})
+
+}
+
+</script>
+
+</body>
+</html>
